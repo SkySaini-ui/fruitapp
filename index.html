@@ -4,262 +4,316 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FreshMart - Fresh Fruits & Vegetables</title>
-  <meta name="description" content="Order fresh fruits and vegetables for next-day delivery" />
   <meta name="theme-color" content="#2d6a4f" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <link rel="stylesheet" href="css/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{--green:#2d6a4f;--gl:#52b788;--gp:#d8f3dc;--orange:#f77f00;--yellow:#fcbf49;--red:#e63946;--bg:#f8fdf9;--card:#fff;--text:#1b1b2f;--muted:#6b7280;--border:#e5e7eb;--shadow:0 4px 24px rgba(45,106,79,.10);--r:16px;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+    .navbar{background:var(--green);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(45,106,79,.3);}
+    .nav-brand{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;}
+    .nav-tabs{display:flex;gap:5px;}
+    .nav-tab{background:transparent;border:2px solid transparent;color:rgba(255,255,255,.8);padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:600;transition:all .2s;}
+    .nav-tab.active,.nav-tab:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.3);}
+    .cart-btn{background:var(--orange);border:none;color:#fff;padding:8px 14px;border-radius:20px;font-weight:700;cursor:pointer;font-size:1rem;display:flex;align-items:center;gap:5px;}
+    .cart-count{background:#fff;color:var(--orange);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;}
+    .page{display:none;max-width:900px;margin:0 auto;padding:0 16px;}
+    .page.active{display:block;}
+    .hero{background:linear-gradient(135deg,var(--green),var(--gl));border-radius:var(--r);margin:20px 0;padding:28px 24px;display:flex;justify-content:space-between;align-items:center;color:#fff;overflow:hidden;position:relative;}
+    .hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:rgba(255,255,255,.07);border-radius:50%;}
+    .hero h1{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;line-height:1.2;}
+    .hero h1 span{color:var(--yellow);}
+    .hero p{margin-top:8px;opacity:.85;font-size:.92rem;}
+    .hero-e{font-size:2rem;line-height:1.8;text-align:right;}
+    .sec-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--green);margin:24px 0 12px;}
+    .filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+    .filter-btn{padding:8px 18px;border-radius:20px;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.88rem;transition:all .2s;}
+    .filter-btn.active,.filter-btn:hover{background:var(--green);color:#fff;border-color:var(--green);}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;margin-bottom:32px;}
+    .pcard{background:var(--card);border-radius:var(--r);padding:18px 14px;box-shadow:var(--shadow);text-align:center;transition:transform .2s;border:2px solid transparent;}
+    .pcard:hover{transform:translateY(-3px);border-color:var(--gp);}
+    .pcard.oos{opacity:.5;}
+    .pe{font-size:2.4rem;margin-bottom:8px;}
+    .pn{font-weight:700;font-size:.95rem;margin-bottom:4px;}
+    .pp{color:var(--green);font-weight:800;font-size:1.05rem;}
+    .pu{font-size:.75rem;color:var(--muted);}
+    .ps{font-size:.78rem;color:var(--muted);margin:5px 0 10px;}
+    .ps.low{color:var(--red);font-weight:700;}
+    .btn-add{width:100%;padding:9px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;transition:background .2s;}
+    .btn-add:hover{background:var(--gl);}
+    .btn-add:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+    .qc{display:flex;align-items:center;justify-content:center;gap:10px;}
+    .qb{width:30px;height:30px;background:var(--gp);color:var(--green);border:none;border-radius:8px;font-size:1.2rem;cursor:pointer;font-weight:800;line-height:1;}
+    .qb:hover{background:var(--green);color:#fff;}
+    .qn{font-weight:800;font-size:1rem;min-width:22px;text-align:center;}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px;}
+    .overlay.open{display:flex;}
+    .modal{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+    .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .mhead h2{font-family:'Playfair Display',serif;font-size:1.3rem;}
+    .cbtn{background:var(--gp);border:none;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:1rem;color:var(--green);}
+    .ci{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);gap:10px;}
+    .cin{flex:1;font-weight:600;}
+    .cip{color:var(--green);font-weight:800;white-space:nowrap;}
+    .cfooter{border-top:2px solid var(--border);padding-top:14px;margin-top:8px;display:flex;flex-direction:column;gap:12px;}
+    .ctotal{font-size:1.2rem;font-weight:800;}
+    .fg{margin-bottom:14px;}
+    .fg label{display:block;font-weight:700;font-size:.8rem;margin-bottom:5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    .fg input,.fg textarea{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;}
+    .fg input:focus,.fg textarea:focus{border-color:var(--green);}
+    .po{display:flex;gap:16px;flex-wrap:wrap;}
+    .pol{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;}
+    .ubox{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:2px solid var(--gl);border-radius:14px;padding:16px;margin-bottom:12px;}
+    .urow{display:flex;gap:14px;align-items:center;}
+    .uicon{font-size:3rem;}
+    .ulbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    .uval{font-weight:800;color:var(--green);font-size:1rem;word-break:break-all;}
+    .sbox{background:var(--gp);border-radius:12px;padding:14px;margin-top:10px;font-size:.9rem;}
+    .sbox>div{margin-bottom:5px;}
+    .btn-p{background:var(--green);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:background .2s;}
+    .btn-p:hover{background:var(--gl);}
+    .ocard{background:#fff;border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border-left:4px solid var(--green);}
+    .ocard.pending{border-color:var(--orange);}
+    .ocard.delivered{border-color:var(--gl);}
+    .oid{font-size:.78rem;color:var(--muted);}
+    .oaddr{font-weight:700;}
+    .oitems{font-size:.88rem;margin:6px 0;}
+    .ometa{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;}
+    .bp{background:#fff3cd;color:#856404;}
+    .bd{background:var(--gp);color:var(--green);}
+    .bc{background:#f8d7da;color:#721c24;}
+    .bu{background:#cce5ff;color:#004085;}
+    .bpd{background:var(--gp);color:var(--green);}
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:#fff;padding:12px 26px;border-radius:30px;font-weight:700;z-index:999;transition:transform .3s;white-space:nowrap;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .empty{text-align:center;color:var(--muted);padding:48px 20px;}
+    .empty .big{font-size:3rem;margin-bottom:12px;}
+    @media(max-width:600px){.hero h1{font-size:1.5rem;}.hero-e{font-size:1.5rem;}.nav-brand{font-size:1.1rem;}.nav-tab{padding:5px 9px;font-size:.78rem;}}
+  </style>
 </head>
 <body>
-
-<!-- NAV -->
 <nav class="navbar">
   <div class="nav-brand">🥦 FreshMart</div>
-  <div class="nav-links">
-    <button class="nav-btn active" onclick="showPage('shop')">Shop</button>
-    <button class="nav-btn" onclick="showPage('orders')">Orders</button>
-    <button class="nav-btn" onclick="showPage('stock')">Stock</button>
-    <button class="nav-btn" onclick="showPage('payments')">Payments</button>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('shop',this)">🛒 Shop</button>
+    <button class="nav-tab" onclick="showTab('myorders',this)">📋 My Orders</button>
   </div>
-  <div class="cart-icon" onclick="showCart()">
-    🛒 <span class="cart-count" id="cartCount">0</span>
-  </div>
+  <button class="cart-btn" onclick="openCart()">🛒 <span class="cart-count" id="cartCount">0</span></button>
 </nav>
 
-<!-- ===================== SHOP PAGE ===================== -->
-<div id="page-shop" class="page active">
+<!-- SHOP -->
+<div class="page active" id="tab-shop">
   <div class="hero">
-    <div class="hero-text">
-      <h1>Farm Fresh<br><span class="accent">Every Morning</span></h1>
-      <p>Order today. Delivered fresh tomorrow.</p>
-    </div>
-    <div class="hero-illustration">🍎🥦🍋🥕🍇🧅</div>
+    <div><h1>Farm Fresh<br><span>Every Morning</span></h1><p>Order today. Delivered fresh tomorrow.</p></div>
+    <div class="hero-e">🍎🥦<br>🍋🥕<br>🍇🧅</div>
   </div>
-
-  <div class="section-title">Today's Fresh Stock</div>
-
+  <div class="sec-title">Today's Fresh Stock</div>
   <div class="filter-bar">
-    <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
-    <button class="filter-btn" onclick="filterProducts('fruit', this)">🍎 Fruits</button>
-    <button class="filter-btn" onclick="filterProducts('vegetable', this)">🥦 Vegetables</button>
+    <button class="filter-btn active" onclick="filterCat('all',this)">All</button>
+    <button class="filter-btn" onclick="filterCat('fruit',this)">🍎 Fruits</button>
+    <button class="filter-btn" onclick="filterCat('vegetable',this)">🥦 Vegetables</button>
   </div>
-
-  <div class="product-grid" id="productGrid"></div>
+  <div class="grid" id="productGrid"></div>
 </div>
 
-<!-- ===================== CART MODAL ===================== -->
-<div class="modal-overlay" id="cartModal" onclick="closeCart(event)">
+<!-- MY ORDERS -->
+<div class="page" id="tab-myorders">
+  <div class="sec-title" style="margin-top:20px">My Orders</div>
+  <div id="myOrdersList"></div>
+</div>
+
+<!-- CART MODAL -->
+<div class="overlay" id="cartOverlay" onclick="maybeClose('cartOverlay',event)">
   <div class="modal">
-    <div class="modal-header">
-      <h2>Your Cart 🛒</h2>
-      <button class="close-btn" onclick="closeCart()">✕</button>
-    </div>
-    <div id="cartItems"></div>
-    <div class="cart-footer">
-      <div class="cart-total">Total: ₹<span id="cartTotal">0</span></div>
-      <button class="btn-primary" onclick="showCheckout()">Proceed to Order →</button>
+    <div class="mhead"><h2>Your Cart 🛒</h2><button class="cbtn" onclick="closeOverlay('cartOverlay')">✕</button></div>
+    <div id="cartItemsEl"></div>
+    <div class="cfooter">
+      <div class="ctotal">Total: ₹<span id="cartTotalEl">0</span></div>
+      <button class="btn-p" onclick="goCheckout()">Place Order →</button>
     </div>
   </div>
 </div>
 
-<!-- ===================== CHECKOUT MODAL ===================== -->
-<div class="modal-overlay" id="checkoutModal" onclick="closeCheckout(event)">
+<!-- CHECKOUT MODAL -->
+<div class="overlay" id="checkoutOverlay" onclick="maybeClose('checkoutOverlay',event)">
   <div class="modal">
-    <div class="modal-header">
-      <h2>Place Order 📋</h2>
-      <button class="close-btn" onclick="closeCheckout()">✕</button>
-    </div>
-    <div class="form-group">
-      <label>Your Name *</label>
-      <input type="text" id="custName" placeholder="Enter your name" />
-    </div>
-    <div class="form-group">
-      <label>Phone Number *</label>
-      <input type="tel" id="custPhone" placeholder="Enter phone number" />
-    </div>
-    <div class="form-group">
-      <label>Delivery Address *</label>
-      <textarea id="custAddress" placeholder="Enter delivery address" rows="2"></textarea>
-    </div>
-    <div class="form-group">
+    <div class="mhead"><h2>Confirm Order 📋</h2><button class="cbtn" onclick="closeOverlay('checkoutOverlay')">✕</button></div>
+    <div class="fg"><label>Your Name *</label><input id="cName" placeholder="Enter your name"/></div>
+    <div class="fg"><label>Phone Number *</label><input type="tel" id="cPhone" placeholder="+91 XXXXXXXXXX"/></div>
+    <div class="fg"><label>Delivery Address *</label><textarea id="cAddr" rows="2" placeholder="Full delivery address"></textarea></div>
+    <div class="fg">
       <label>Payment Method</label>
-      <div class="payment-options">
-        <label class="pay-option">
-          <input type="radio" name="payMethod" value="cash" checked /> Cash on Delivery
-        </label>
-        <label class="pay-option">
-          <input type="radio" name="payMethod" value="upi" /> UPI / Online
-        </label>
+      <div class="po">
+        <label class="pol"><input type="radio" name="pm" value="cash" checked onchange="toggleUpi()"> Cash on Delivery</label>
+        <label class="pol"><input type="radio" name="pm" value="upi" onchange="toggleUpi()"> UPI / Online</label>
       </div>
     </div>
-    <div id="upiDetails" class="upi-box" style="display:none;">
-      <div class="upi-info">
-        <div class="upi-qr">📱</div>
+    <div id="upiBox" class="ubox" style="display:none">
+      <div class="urow">
+        <div class="uicon">📱</div>
         <div>
-          <div class="upi-label">UPI ID</div>
-          <div class="upi-value" id="shopUpiId">yourshop@upi</div>
-          <div class="upi-label" style="margin-top:6px">Phone Pay / GPay / Paytm</div>
-          <div class="upi-value" id="shopPhone">+91 XXXXXXXXXX</div>
+          <div class="ulbl">UPI ID</div><div class="uval" id="showUpiId">—</div>
+          <div class="ulbl" style="margin-top:6px">Phone Pay / GPay / Paytm</div>
+          <div class="uval" id="showUpiPhone">—</div>
         </div>
       </div>
-      <div class="form-group" style="margin-top:12px">
-        <label>Transaction / UTR Number</label>
-        <input type="text" id="utrNumber" placeholder="Enter UTR after payment" />
-      </div>
+      <div class="fg" style="margin-top:12px"><label>UTR / Transaction Number</label><input id="utrInput" placeholder="Enter after payment"/></div>
     </div>
-    <div class="order-summary-box" id="orderSummaryBox"></div>
-    <button class="btn-primary" style="width:100%;margin-top:16px" onclick="placeOrder()">✅ Confirm Order</button>
+    <div class="sbox" id="checkoutSummary"></div>
+    <button class="btn-p" style="width:100%;margin-top:16px" onclick="confirmOrder()">✅ Confirm Order</button>
   </div>
 </div>
 
-<!-- ===================== ORDERS PAGE ===================== -->
-<div id="page-orders" class="page">
-  <div class="page-header">
-    <h2>Orders Dashboard</h2>
-    <div class="header-actions">
-      <select id="orderDateFilter" onchange="renderOrders()">
-        <option value="today">Today's Orders</option>
-        <option value="tomorrow">Tomorrow's Delivery</option>
-        <option value="all">All Orders</option>
-      </select>
-      <button class="btn-secondary" onclick="exportOrders()">📤 Export</button>
-    </div>
-  </div>
-
-  <div class="stats-row" id="orderStats"></div>
-  <div id="ordersList"></div>
-</div>
-
-<!-- ===================== STOCK PAGE ===================== -->
-<div id="page-stock" class="page">
-  <div class="page-header">
-    <h2>Stock Management</h2>
-    <button class="btn-primary" onclick="showAddStock()">+ Add Item</button>
-  </div>
-
-  <div class="stats-row" id="stockStats"></div>
-
-  <div class="stock-table-wrap">
-    <table class="stock-table">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Category</th>
-          <th>Opening Stock</th>
-          <th>Sold</th>
-          <th>Available</th>
-          <th>Price (₹/kg)</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="stockTableBody"></tbody>
-    </table>
-  </div>
-
-  <!-- Add Stock Modal -->
-  <div class="modal-overlay" id="addStockModal" onclick="closeAddStock(event)">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Add / Update Item</h2>
-        <button class="close-btn" onclick="closeAddStock()">✕</button>
-      </div>
-      <div class="form-group">
-        <label>Item Name</label>
-        <input type="text" id="stockName" placeholder="e.g. Mango" />
-      </div>
-      <div class="form-group">
-        <label>Category</label>
-        <select id="stockCategory">
-          <option value="fruit">Fruit</option>
-          <option value="vegetable">Vegetable</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Emoji Icon</label>
-        <input type="text" id="stockEmoji" placeholder="🍎" maxlength="2" />
-      </div>
-      <div class="form-group">
-        <label>Opening Stock (kg)</label>
-        <input type="number" id="stockQty" placeholder="0" min="0" />
-      </div>
-      <div class="form-group">
-        <label>Price per kg (₹)</label>
-        <input type="number" id="stockPrice" placeholder="0" min="0" />
-      </div>
-      <button class="btn-primary" style="width:100%" onclick="saveStock()">Save Item</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== PAYMENTS PAGE ===================== -->
-<div id="page-payments" class="page">
-  <div class="page-header">
-    <h2>Payment Details</h2>
-    <button class="btn-secondary" onclick="showEditPayment()">✏️ Edit</button>
-  </div>
-
-  <div class="payment-card">
-    <div class="payment-card-header">Your Shop's UPI Details</div>
-    <div class="payment-detail-row">
-      <span>UPI ID</span>
-      <strong id="displayUpiId">—</strong>
-    </div>
-    <div class="payment-detail-row">
-      <span>Phone (GPay/Paytm)</span>
-      <strong id="displayPhone">—</strong>
-    </div>
-    <div class="payment-detail-row">
-      <span>Account Holder</span>
-      <strong id="displayName">—</strong>
-    </div>
-    <div class="payment-detail-row">
-      <span>Bank Name</span>
-      <strong id="displayBank">—</strong>
-    </div>
-    <div class="qr-placeholder" id="qrPlaceholder">
-      <div style="font-size:48px">📱</div>
-      <div>Your QR code shown to customers</div>
-    </div>
-  </div>
-
-  <div class="section-title" style="margin-top:32px">Payment Summary</div>
-  <div class="stats-row" id="paymentStats"></div>
-
-  <div class="section-title" style="margin-top:32px">Pending Payments</div>
-  <div id="pendingPayments"></div>
-
-  <!-- Edit Payment Modal -->
-  <div class="modal-overlay" id="editPaymentModal" onclick="closeEditPayment(event)">
-    <div class="modal">
-      <div class="modal-header">
-        <h2>Edit Payment Details</h2>
-        <button class="close-btn" onclick="closeEditPayment()">✕</button>
-      </div>
-      <div class="form-group">
-        <label>UPI ID</label>
-        <input type="text" id="editUpiId" placeholder="yourname@upi" />
-      </div>
-      <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" id="editPhone" placeholder="+91 XXXXXXXXXX" />
-      </div>
-      <div class="form-group">
-        <label>Account Holder Name</label>
-        <input type="text" id="editHolderName" placeholder="Your name" />
-      </div>
-      <div class="form-group">
-        <label>Bank Name</label>
-        <input type="text" id="editBank" placeholder="SBI / HDFC / etc." />
-      </div>
-      <button class="btn-primary" style="width:100%" onclick="savePaymentDetails()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Toast Notification -->
 <div class="toast" id="toast"></div>
 
-<script src="js/app.js"></script>
+<script>
+function getData(k,def){try{return JSON.parse(localStorage.getItem(k))||def;}catch{return def;}}
+function getProds(){return getData('fm_products',[]);}
+function getOrders(){return getData('fm_orders',[]);}
+function getPay(){return getData('fm_payment',{});}
+function saveOrders(o){localStorage.setItem('fm_orders',JSON.stringify(o));}
+
+let cart={},catFilter='all';
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function showTab(n,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(n==='shop')renderProducts();
+  if(n==='myorders')renderMyOrders();
+}
+
+function filterCat(c,btn){
+  catFilter=c;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+
+function calcSold(id){
+  return getOrders().filter(o=>o.status!=='cancelled')
+    .reduce((a,o)=>a+(o.items||[]).filter(i=>i.productId==id).reduce((s,i)=>s+i.qty,0),0);
+}
+
+function renderProducts(){
+  const prods=getProds();
+  const list=catFilter==='all'?prods:prods.filter(p=>p.category===catFilter);
+  const grid=document.getElementById('productGrid');
+  if(!list.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="big">🌿</div>No items available</div>';return;}
+  grid.innerHTML=list.map(p=>{
+    const avail=p.stock-calcSold(p.id);
+    const inCart=cart[p.id]||0;
+    const low=avail>0&&avail<=5,oos=avail<=0;
+    return `<div class="pcard ${oos?'oos':''}">
+      <div class="pe">${p.emoji}</div>
+      <div class="pn">${p.name}</div>
+      <div class="pp">₹${p.price}<span class="pu">/kg</span></div>
+      <div class="ps ${low?'low':''}">${oos?'❌ Out of stock':low?`⚠️ Only ${avail}kg left`:`${avail}kg available`}</div>
+      ${oos?`<button class="btn-add" disabled>Out of Stock</button>`:
+        inCart===0?`<button class="btn-add" onclick="addCart(${p.id})">+ Add to Cart</button>`:
+        `<div class="qc"><button class="qb" onclick="chgQty(${p.id},-1)">−</button><span class="qn">${inCart}kg</span><button class="qb" onclick="chgQty(${p.id},1)">+</button></div>`}
+    </div>`;
+  }).join('');
+}
+
+function addCart(id){cart[id]=1;updCount();renderProducts();}
+function chgQty(id,d){
+  const p=getProds().find(x=>x.id==id);
+  const avail=p.stock-calcSold(p.id);
+  cart[id]=(cart[id]||0)+d;
+  if(cart[id]>avail){cart[id]=avail;toast('Max stock reached');}
+  if(cart[id]<=0)delete cart[id];
+  updCount();renderProducts();
+}
+function updCount(){document.getElementById('cartCount').textContent=Object.values(cart).reduce((a,b)=>a+b,0);}
+
+function openCart(){document.getElementById('cartOverlay').classList.add('open');renderCartModal();}
+function closeOverlay(id){document.getElementById(id).classList.remove('open');}
+function maybeClose(id,e){if(e.target===document.getElementById(id))closeOverlay(id);}
+
+function renderCartModal(){
+  const keys=Object.keys(cart),prods=getProds();let total=0;
+  const el=document.getElementById('cartItemsEl');
+  if(!keys.length){el.innerHTML='<p class="empty">Cart is empty</p>';document.getElementById('cartTotalEl').textContent=0;return;}
+  el.innerHTML=keys.map(id=>{
+    const p=prods.find(x=>x.id==id);const sub=p.price*cart[id];total+=sub;
+    return `<div class="ci"><div class="cin">${p.emoji} ${p.name}</div>
+      <div class="qc" style="gap:6px"><button class="qb" onclick="chgQty(${p.id},-1);renderCartModal()">−</button><span class="qn">${cart[id]}kg</span><button class="qb" onclick="chgQty(${p.id},1);renderCartModal()">+</button></div>
+      <div class="cip">₹${sub}</div></div>`;
+  }).join('');
+  document.getElementById('cartTotalEl').textContent=total;
+}
+
+function goCheckout(){
+  if(!Object.keys(cart).length){toast('Cart is empty');return;}
+  closeOverlay('cartOverlay');
+  const pay=getPay();
+  document.getElementById('showUpiId').textContent=pay.upiId||'Contact shop for UPI';
+  document.getElementById('showUpiPhone').textContent=pay.phone||'—';
+  renderSummary();
+  document.getElementById('checkoutOverlay').classList.add('open');
+}
+
+function toggleUpi(){
+  document.getElementById('upiBox').style.display=document.querySelector('input[name="pm"]:checked').value==='upi'?'block':'none';
+}
+
+function renderSummary(){
+  const prods=getProds();let total=0;
+  const lines=Object.keys(cart).map(id=>{const p=prods.find(x=>x.id==id);const sub=p.price*cart[id];total+=sub;return `<div>${p.emoji} ${p.name} × ${cart[id]}kg = ₹${sub}</div>`;});
+  document.getElementById('checkoutSummary').innerHTML=lines.join('')+`<div style="border-top:1px solid #aaa;margin-top:8px;padding-top:8px;font-weight:800">Total: ₹${total}</div>`;
+}
+
+function confirmOrder(){
+  const name=document.getElementById('cName').value.trim();
+  const phone=document.getElementById('cPhone').value.trim();
+  const addr=document.getElementById('cAddr').value.trim();
+  const method=document.querySelector('input[name="pm"]:checked').value;
+  const utr=document.getElementById('utrInput').value.trim();
+  if(!name||!phone||!addr){toast('⚠️ Please fill all fields');return;}
+  const prods=getProds();let total=0;
+  const items=Object.keys(cart).map(id=>{const p=prods.find(x=>x.id==id);const sub=p.price*cart[id];total+=sub;return{productId:p.id,name:p.name,emoji:p.emoji,qty:cart[id],price:p.price,subtotal:sub};});
+  const order={id:'ORD'+Date.now(),customer:name,phone,address:addr,paymentMethod:method,utr:utr||'',paymentStatus:method==='upi'&&utr?'paid':'pending',status:'pending',items,total,orderDate:new Date().toISOString(),deliveryDate:getTomorrow()};
+  const orders=getOrders();orders.unshift(order);saveOrders(orders);
+  localStorage.setItem('fm_my_phone',phone);
+  cart={};updCount();closeOverlay('checkoutOverlay');
+  ['cName','cPhone','cAddr','utrInput'].forEach(id=>document.getElementById(id).value='');
+  toast(`✅ Order placed! ID: ${order.id}`);renderProducts();
+}
+
+function getTomorrow(){const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+
+function renderMyOrders(){
+  const el=document.getElementById('myOrdersList');
+  const phone=localStorage.getItem('fm_my_phone')||'';
+  const all=getOrders();
+  const mine=phone?all.filter(o=>o.phone===phone):all;
+  if(!mine.length){el.innerHTML='<div class="empty"><div class="big">📋</div>No orders yet.<br>Start shopping!</div>';return;}
+  el.innerHTML=mine.map(o=>`
+    <div class="ocard ${o.status}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px">
+        <div><div class="oid">${o.id} · ${fmt(o.orderDate)}</div><div class="oaddr">📍 ${o.address}</div></div>
+        <div style="font-weight:800;color:var(--green);font-size:1.1rem">₹${o.total}</div>
+      </div>
+      <div class="oitems">${o.items.map(i=>`${i.emoji} ${i.name} ×${i.qty}kg`).join(' · ')}</div>
+      <div class="ometa">
+        <span class="badge ${o.status==='delivered'?'bd':'bp'}">${o.status==='delivered'?'✅ Delivered':'🕐 Pending'}</span>
+        <span class="badge ${o.paymentMethod==='upi'?'bu':'bc'}">${o.paymentMethod}</span>
+        <span class="badge ${o.paymentStatus==='paid'?'bpd':'bp'}">${o.paymentStatus==='paid'?'✅ Paid':'⏳ Unpaid'}</span>
+        <span style="margin-left:auto;font-size:.78rem;color:var(--muted)">Delivery: ${o.deliveryDate}</span>
+      </div>
+    </div>`).join('');
+}
+
+function fmt(iso){if(!iso)return'';return new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
+
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js'));
+renderProducts();
+</script>
 </body>
 </html>

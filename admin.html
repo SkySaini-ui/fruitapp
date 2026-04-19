@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FreshMart Admin</title>
+  <meta name="robots" content="noindex, nofollow"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--green:#2d6a4f;--gl:#52b788;--gp:#d8f3dc;--orange:#f77f00;--yellow:#fcbf49;--red:#e63946;--bg:#f0f7f2;--card:#fff;--text:#1b1b2f;--muted:#6b7280;--border:#e5e7eb;--shadow:0 4px 24px rgba(45,106,79,.10);--r:16px;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+
+    /* ===== LOGIN SCREEN ===== */
+    .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--green),var(--gl));padding:20px;}
+    .login-box{background:#fff;border-radius:24px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2);text-align:center;}
+    .login-icon{font-size:3.5rem;margin-bottom:12px;}
+    .login-box h1{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--green);margin-bottom:6px;}
+    .login-box p{color:var(--muted);font-size:.9rem;margin-bottom:28px;}
+    .login-input{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:1rem;outline:none;text-align:center;letter-spacing:4px;font-size:1.3rem;transition:border-color .2s;margin-bottom:16px;}
+    .login-input:focus{border-color:var(--green);}
+    .login-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;transition:background .2s;}
+    .login-btn:hover{background:var(--gl);}
+    .login-err{color:var(--red);font-size:.88rem;margin-top:10px;display:none;}
+    .login-hint{color:var(--muted);font-size:.78rem;margin-top:14px;}
+
+    /* ===== ADMIN LAYOUT ===== */
+    #adminApp{display:none;}
+    .navbar{background:var(--green);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(45,106,79,.3);flex-wrap:wrap;gap:8px;}
+    .nav-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;}
+    .nav-brand span{background:var(--yellow);color:var(--text);padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:800;margin-left:8px;vertical-align:middle;}
+    .nav-tabs{display:flex;gap:4px;flex-wrap:wrap;}
+    .nav-tab{background:transparent;border:2px solid transparent;color:rgba(255,255,255,.8);padding:7px 12px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;transition:all .2s;}
+    .nav-tab.active,.nav-tab:hover{background:rgba(255,255,255,.18);color:#fff;border-color:rgba(255,255,255,.3);}
+    .logout-btn{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:700;}
+    .logout-btn:hover{background:rgba(255,255,255,.25);}
+
+    .page{display:none;max-width:960px;margin:0 auto;padding:0 16px;}
+    .page.active{display:block;}
+
+    /* STATS */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:20px;}
+    .stat{background:#fff;border-radius:14px;padding:16px;box-shadow:var(--shadow);text-align:center;}
+    .stat-val{font-size:1.6rem;font-weight:800;color:var(--green);}
+    .stat-val.warn{color:var(--red);}
+    .stat-lbl{font-size:.75rem;color:var(--muted);margin-top:4px;}
+
+    /* PAGE HEADER */
+    .ph{display:flex;align-items:center;justify-content:space-between;margin:20px 0 16px;gap:10px;flex-wrap:wrap;}
+    .ph h2{font-family:'Playfair Display',serif;font-size:1.5rem;}
+    .ph-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+    /* BUTTONS */
+    .btn-p{background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px 22px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:background .2s;}
+    .btn-p:hover{background:var(--gl);}
+    .btn-s{background:#fff;color:var(--green);border:2px solid var(--green);border-radius:12px;padding:9px 18px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;}
+    .btn-s:hover{background:var(--gp);}
+    .btn-sm{padding:5px 12px;font-size:.8rem;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;border:none;margin-left:4px;}
+    .btn-ok{background:var(--green);color:#fff;}
+    .btn-warn{background:var(--yellow);color:#333;}
+    .btn-del{background:#f8d7da;color:var(--red);}
+    .btn-edit{background:#cce5ff;color:#004085;}
+
+    /* STOCK TABLE */
+    .tbl-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+    th{background:var(--green);color:#fff;padding:12px 14px;text-align:left;font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;}
+    td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:.9rem;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:var(--gp);}
+    .avail{font-weight:800;color:var(--green);}
+    .avail.low{color:var(--red);}
+    .avail.zero{color:var(--muted);}
+
+    /* ORDERS */
+    .ocard{background:#fff;border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:12px;border-left:4px solid var(--green);}
+    .ocard.pending{border-color:var(--orange);}
+    .ocard.delivered{border-color:var(--gl);opacity:.85;}
+    .ohead{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;}
+    .oid{font-size:.75rem;color:var(--muted);}
+    .oname{font-weight:800;font-size:1rem;}
+    .ophone{font-size:.85rem;color:var(--muted);}
+    .oitems{margin:8px 0;font-size:.88rem;}
+    .ometa{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:800;text-transform:uppercase;}
+    .bp{background:#fff3cd;color:#856404;}
+    .bd{background:var(--gp);color:var(--green);}
+    .bc{background:#f8d7da;color:#721c24;}
+    .bu{background:#cce5ff;color:#004085;}
+    .bpd{background:var(--gp);color:var(--green);}
+    .ototal{font-weight:800;color:var(--green);font-size:1rem;}
+
+    /* PAYMENTS */
+    .pay-card{background:linear-gradient(135deg,var(--green),var(--gl));color:#fff;border-radius:20px;padding:24px;margin-bottom:24px;}
+    .pay-card-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:16px;opacity:.85;}
+    .pay-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.2);font-size:.95rem;}
+    .pay-row:last-of-type{border-bottom:none;}
+    .pay-row span{opacity:.8;}
+    .qr-ph{background:rgba(255,255,255,.15);border-radius:14px;padding:24px;text-align:center;margin-top:16px;font-size:.9rem;opacity:.85;}
+    .pending-item{background:#fff;border-radius:12px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+    /* MODAL */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px;}
+    .overlay.open{display:flex;}
+    .modal{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+    .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .mhead h2{font-family:'Playfair Display',serif;font-size:1.3rem;}
+    .cbtn{background:var(--gp);border:none;border-radius:8px;padding:4px 12px;cursor:pointer;font-size:1rem;color:var(--green);}
+    .fg{margin-bottom:14px;}
+    .fg label{display:block;font-weight:700;font-size:.8rem;margin-bottom:5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    .fg input,.fg textarea,.fg select{width:100%;padding:11px 14px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;}
+    .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--green);}
+
+    /* CHANGE PASSWORD */
+    .settings-card{background:#fff;border-radius:var(--r);padding:20px;box-shadow:var(--shadow);margin-bottom:16px;}
+    .settings-card h3{font-family:'Playfair Display',serif;color:var(--green);margin-bottom:14px;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:#fff;padding:12px 26px;border-radius:30px;font-weight:700;z-index:999;transition:transform .3s;white-space:nowrap;}
+    .toast.show{transform:translateX(-50%) translateY(0);}
+    .empty{text-align:center;color:var(--muted);padding:48px 20px;}
+    .sec-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--green);margin:20px 0 12px;}
+
+    select{appearance:auto;}
+    @media(max-width:600px){.nav-brand{font-size:1rem;}.nav-tab{padding:5px 8px;font-size:.75rem;}}
+  </style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-box">
+    <div class="login-icon">🔐</div>
+    <h1>Admin Portal</h1>
+    <p>FreshMart — Owner Access Only</p>
+    <input class="login-input" type="password" id="pwdInput" placeholder="••••" maxlength="20" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">🔓 Login</button>
+    <div class="login-err" id="loginErr">❌ Wrong password. Try again.</div>
+    <div class="login-hint">Default password: <strong>fresh123</strong><br>Change it in Settings after login.</div>
+  </div>
+</div>
+
+<!-- ===== ADMIN APP ===== -->
+<div id="adminApp">
+  <nav class="navbar">
+    <div class="nav-brand">🥦 FreshMart <span>ADMIN</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showTab('orders',this)">📋 Orders</button>
+      <button class="nav-tab" onclick="showTab('stock',this)">📦 Stock</button>
+      <button class="nav-tab" onclick="showTab('payments',this)">💳 Payments</button>
+      <button class="nav-tab" onclick="showTab('settings',this)">⚙️ Settings</button>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+  </nav>
+
+  <!-- ===== ORDERS ===== -->
+  <div class="page active" id="tab-orders">
+    <div class="ph">
+      <h2>Orders Dashboard</h2>
+      <div class="ph-actions">
+        <select id="orderFilter" onchange="renderOrders()">
+          <option value="today">Today's Orders</option>
+          <option value="tomorrow">Tomorrow's Delivery</option>
+          <option value="all">All Orders</option>
+        </select>
+        <button class="btn-s" onclick="exportOrders()">📤 Export</button>
+      </div>
+    </div>
+    <div class="stats-row" id="orderStats"></div>
+    <div id="ordersList"></div>
+  </div>
+
+  <!-- ===== STOCK ===== -->
+  <div class="page" id="tab-stock">
+    <div class="ph">
+      <h2>Stock Management</h2>
+      <button class="btn-p" onclick="openAddStock()">+ Add Item</button>
+    </div>
+    <div class="stats-row" id="stockStats"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th><th>Category</th><th>Opening</th><th>Sold</th><th>Available</th><th>Price ₹/kg</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="stockBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PAYMENTS ===== -->
+  <div class="page" id="tab-payments">
+    <div class="ph">
+      <h2>Payment Details</h2>
+      <button class="btn-s" onclick="openEditPay()">✏️ Edit</button>
+    </div>
+    <div class="pay-card">
+      <div class="pay-card-title">Your UPI / Shop Details</div>
+      <div class="pay-row"><span>UPI ID</span><strong id="dUpiId">—</strong></div>
+      <div class="pay-row"><span>Phone (GPay/Paytm)</span><strong id="dPhone">—</strong></div>
+      <div class="pay-row"><span>Account Holder</span><strong id="dName">—</strong></div>
+      <div class="pay-row"><span>Bank</span><strong id="dBank">—</strong></div>
+      <div class="qr-ph">📱 QR shown to customers at checkout</div>
+    </div>
+    <div class="sec-title">Payment Summary</div>
+    <div class="stats-row" id="payStats"></div>
+    <div class="sec-title">Pending Payments</div>
+    <div id="pendingPay"></div>
+  </div>
+
+  <!-- ===== SETTINGS ===== -->
+  <div class="page" id="tab-settings">
+    <div class="ph"><h2>Settings</h2></div>
+    <div class="settings-card">
+      <h3>🔐 Change Admin Password</h3>
+      <div class="fg"><label>Current Password</label><input type="password" id="oldPwd" placeholder="Current password"/></div>
+      <div class="fg"><label>New Password</label><input type="password" id="newPwd" placeholder="New password (min 4 chars)"/></div>
+      <div class="fg"><label>Confirm New Password</label><input type="password" id="confPwd" placeholder="Confirm new password"/></div>
+      <button class="btn-p" onclick="changePwd()">Update Password</button>
+    </div>
+    <div class="settings-card">
+      <h3>🛒 Shop Name</h3>
+      <div class="fg"><label>Shop Name</label><input type="text" id="shopNameInput" placeholder="FreshMart"/></div>
+      <button class="btn-p" onclick="saveShopName()">Save</button>
+    </div>
+    <div class="settings-card" style="border:2px solid #f8d7da;">
+      <h3 style="color:var(--red)">⚠️ Data Management</h3>
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px">These actions cannot be undone.</p>
+      <button class="btn-sm btn-del" style="padding:10px 18px;font-size:.88rem" onclick="clearAllOrders()">🗑 Clear All Orders</button>
+      &nbsp;
+      <button class="btn-sm btn-del" style="padding:10px 18px;font-size:.88rem" onclick="resetStock()">🗑 Reset Stock to Default</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT STOCK MODAL -->
+<div class="overlay" id="stockOverlay" onclick="maybeClose('stockOverlay',event)">
+  <div class="modal">
+    <div class="mhead"><h2 id="stockModalTitle">Add Item</h2><button class="cbtn" onclick="closeOverlay('stockOverlay')">✕</button></div>
+    <div class="fg"><label>Item Name</label><input id="sName" placeholder="e.g. Mango"/></div>
+    <div class="fg"><label>Category</label><select id="sCat"><option value="fruit">🍎 Fruit</option><option value="vegetable">🥦 Vegetable</option></select></div>
+    <div class="fg"><label>Emoji</label><input id="sEmoji" placeholder="🍎" maxlength="2"/></div>
+    <div class="fg"><label>Opening Stock (kg)</label><input type="number" id="sStock" placeholder="0" min="0"/></div>
+    <div class="fg"><label>Price per kg (₹)</label><input type="number" id="sPrice" placeholder="0" min="0"/></div>
+    <button class="btn-p" style="width:100%" onclick="saveStock()">Save</button>
+  </div>
+</div>
+
+<!-- EDIT PAYMENT MODAL -->
+<div class="overlay" id="payOverlay" onclick="maybeClose('payOverlay',event)">
+  <div class="modal">
+    <div class="mhead"><h2>Edit Payment Details</h2><button class="cbtn" onclick="closeOverlay('payOverlay')">✕</button></div>
+    <div class="fg"><label>UPI ID</label><input id="eUpiId" placeholder="yourname@upi"/></div>
+    <div class="fg"><label>Phone (GPay/Paytm)</label><input type="tel" id="ePhone" placeholder="+91 XXXXXXXXXX"/></div>
+    <div class="fg"><label>Account Holder Name</label><input id="eName" placeholder="Your name"/></div>
+    <div class="fg"><label>Bank Name</label><input id="eBank" placeholder="SBI / HDFC / etc."/></div>
+    <button class="btn-p" style="width:100%" onclick="savePay()">Save</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// AUTH
+// ============================================================
+const DEFAULT_PWD = 'fresh123';
+function getPwd(){ return localStorage.getItem('fm_admin_pwd') || DEFAULT_PWD; }
+function isLoggedIn(){ return sessionStorage.getItem('fm_admin_ok') === '1'; }
+
+function doLogin(){
+  const v = document.getElementById('pwdInput').value;
+  if(v === getPwd()){
+    sessionStorage.setItem('fm_admin_ok','1');
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    renderOrders(); renderPaymentsDisplay();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('pwdInput').value='';
+    setTimeout(()=>document.getElementById('loginErr').style.display='none',3000);
+  }
+}
+
+function doLogout(){
+  sessionStorage.removeItem('fm_admin_ok');
+  location.reload();
+}
+
+// Check on load
+if(isLoggedIn()){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminApp').style.display='block';
+}
+
+// ============================================================
+// DATA
+// ============================================================
+const DEFAULT_PRODUCTS=[
+  {id:1,name:'Apple',emoji:'🍎',category:'fruit',price:120,stock:30},
+  {id:2,name:'Banana',emoji:'🍌',category:'fruit',price:40,stock:50},
+  {id:3,name:'Mango',emoji:'🥭',category:'fruit',price:80,stock:20},
+  {id:4,name:'Grapes',emoji:'🍇',category:'fruit',price:90,stock:15},
+  {id:5,name:'Orange',emoji:'🍊',category:'fruit',price:60,stock:25},
+  {id:6,name:'Papaya',emoji:'🍈',category:'fruit',price:35,stock:18},
+  {id:7,name:'Tomato',emoji:'🍅',category:'vegetable',price:30,stock:40},
+  {id:8,name:'Potato',emoji:'🥔',category:'vegetable',price:25,stock:60},
+  {id:9,name:'Onion',emoji:'🧅',category:'vegetable',price:35,stock:45},
+  {id:10,name:'Spinach',emoji:'🥬',category:'vegetable',price:20,stock:10},
+  {id:11,name:'Carrot',emoji:'🥕',category:'vegetable',price:40,stock:30},
+  {id:12,name:'Capsicum',emoji:'🫑',category:'vegetable',price:55,stock:12},
+];
+function getProds(){try{return JSON.parse(localStorage.getItem('fm_products'))||DEFAULT_PRODUCTS;}catch{return DEFAULT_PRODUCTS;}}
+function getOrders(){try{return JSON.parse(localStorage.getItem('fm_orders'))||[];}catch{return[];}}
+function getPay(){try{return JSON.parse(localStorage.getItem('fm_payment'))||{};}catch{return{};}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showTab(n,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(n==='orders')renderOrders();
+  if(n==='stock')renderStock();
+  if(n==='payments')renderPaymentsDisplay();
+  if(n==='settings')loadSettings();
+}
+
+function closeOverlay(id){document.getElementById(id).classList.remove('open');}
+function maybeClose(id,e){if(e.target===document.getElementById(id))closeOverlay(id);}
+
+// ============================================================
+// ORDERS
+// ============================================================
+function calcSold(id){
+  return getOrders().filter(o=>o.status!=='cancelled')
+    .reduce((a,o)=>a+(o.items||[]).filter(i=>i.productId==id).reduce((s,i)=>s+i.qty,0),0);
+}
+
+function getToday(){return new Date().toISOString().slice(0,10);}
+function getTomorrow(){const d=new Date();d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);}
+
+function renderOrders(){
+  const f=document.getElementById('orderFilter').value;
+  const today=getToday(),tom=getTomorrow();
+  let list=getOrders();
+  if(f==='today')list=list.filter(o=>o.orderDate?.slice(0,10)===today);
+  if(f==='tomorrow')list=list.filter(o=>o.deliveryDate===tom);
+
+  const total=list.reduce((a,o)=>a+o.total,0);
+  const pending=list.filter(o=>o.status==='pending').length;
+  const delivered=list.filter(o=>o.status==='delivered').length;
+  const unpaid=list.filter(o=>o.paymentStatus==='pending').reduce((a,o)=>a+o.total,0);
+
+  document.getElementById('orderStats').innerHTML=`
+    <div class="stat"><div class="stat-val">${list.length}</div><div class="stat-lbl">Total Orders</div></div>
+    <div class="stat"><div class="stat-val">₹${total}</div><div class="stat-lbl">Revenue</div></div>
+    <div class="stat"><div class="stat-val">${pending}</div><div class="stat-lbl">Pending</div></div>
+    <div class="stat"><div class="stat-val">${delivered}</div><div class="stat-lbl">Delivered</div></div>
+    <div class="stat"><div class="stat-val warn">₹${unpaid}</div><div class="stat-lbl">Unpaid</div></div>`;
+
+  const el=document.getElementById('ordersList');
+  if(!list.length){el.innerHTML='<div class="empty">No orders found</div>';return;}
+
+  el.innerHTML=list.map(o=>`
+    <div class="ocard ${o.status}">
+      <div class="ohead">
+        <div>
+          <div class="oid">${o.id} · ${fmt(o.orderDate)}</div>
+          <div class="oname">👤 ${o.customer}</div>
+          <div class="ophone">📞 ${o.phone}</div>
+          <div class="ophone">📍 ${o.address}</div>
+        </div>
+        <div class="ototal">₹${o.total}</div>
+      </div>
+      <div class="oitems">${o.items.map(i=>`${i.emoji} ${i.name} ×${i.qty}kg (₹${i.subtotal})`).join(' &nbsp;|&nbsp; ')}</div>
+      ${o.utr?`<div style="font-size:.78rem;color:#555;margin-top:4px">UTR: ${o.utr}</div>`:''}
+      <div class="ometa">
+        <span class="badge ${o.status==='delivered'?'bd':'bp'}">${o.status}</span>
+        <span class="badge ${o.paymentMethod==='upi'?'bu':'bc'}">${o.paymentMethod}</span>
+        <span class="badge ${o.paymentStatus==='paid'?'bpd':'bp'}">${o.paymentStatus}</span>
+        <div style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap">
+          ${o.status!=='delivered'?`<button class="btn-sm btn-ok" onclick="markDelivered('${o.id}')">✅ Delivered</button>`:''}
+          ${o.paymentStatus!=='paid'?`<button class="btn-sm btn-warn" onclick="markPaid('${o.id}')">💰 Paid</button>`:''}
+          <button class="btn-sm btn-del" onclick="delOrder('${o.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function markDelivered(id){const o=getOrders();const r=o.find(x=>x.id===id);if(r){r.status='delivered';save('fm_orders',o);renderOrders();toast('✅ Marked delivered');}}
+function markPaid(id){const o=getOrders();const r=o.find(x=>x.id===id);if(r){r.paymentStatus='paid';save('fm_orders',o);renderOrders();renderPaymentsDisplay();toast('💰 Marked paid');}}
+function delOrder(id){if(!confirm('Delete this order?'))return;save('fm_orders',getOrders().filter(x=>x.id!==id));renderOrders();toast('🗑 Deleted');}
+
+function exportOrders(){
+  const f=document.getElementById('orderFilter').value;
+  const today=getToday(),tom=getTomorrow();
+  let list=getOrders();
+  if(f==='today')list=list.filter(o=>o.orderDate?.slice(0,10)===today);
+  if(f==='tomorrow')list=list.filter(o=>o.deliveryDate===tom);
+  let text=`FreshMart Orders Export\n${new Date().toLocaleString()}\n${'='.repeat(50)}\n\n`;
+  list.forEach(o=>{
+    text+=`Order: ${o.id}\nCustomer: ${o.customer} | Phone: ${o.phone}\nAddress: ${o.address}\n`;
+    text+=`Items:\n${o.items.map(i=>`  - ${i.emoji} ${i.name}: ${i.qty}kg @ ₹${i.price} = ₹${i.subtotal}`).join('\n')}\n`;
+    text+=`Total: ₹${o.total} | Payment: ${o.paymentMethod} | Status: ${o.paymentStatus}\nDelivery: ${o.status}\n${'-'.repeat(40)}\n`;
+  });
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download=`orders_${f}_${today}.txt`;a.click();
+}
+
+function fmt(iso){if(!iso)return'';return new Date(iso).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}
+
+// ============================================================
+// STOCK
+// ============================================================
+let editingId=null;
+
+function renderStock(){
+  let totalS=0,totalSold=0,lowC=0;
+  const prods=getProds();
+  document.getElementById('stockBody').innerHTML=prods.map(p=>{
+    const sold=calcSold(p.id),avail=p.stock-sold;
+    totalS+=p.stock;totalSold+=sold;
+    if(avail>0&&avail<=5)lowC++;
+    const cls=avail<=0?'zero':avail<=5?'low':'';
+    return `<tr>
+      <td>${p.emoji} ${p.name}</td>
+      <td>${p.category==='fruit'?'🍎 Fruit':'🥦 Veg'}</td>
+      <td>${p.stock} kg</td>
+      <td>${sold} kg</td>
+      <td class="avail ${cls}">${avail<=0?'❌ 0':avail+' kg'}</td>
+      <td>₹${p.price}</td>
+      <td>
+        <button class="btn-sm btn-edit" onclick="editStock(${p.id})">✏️ Edit</button>
+        <button class="btn-sm btn-del" onclick="delProduct(${p.id})">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('stockStats').innerHTML=`
+    <div class="stat"><div class="stat-val">${prods.length}</div><div class="stat-lbl">Products</div></div>
+    <div class="stat"><div class="stat-val">${totalS}kg</div><div class="stat-lbl">Opening Stock</div></div>
+    <div class="stat"><div class="stat-val">${totalSold}kg</div><div class="stat-lbl">Sold Today</div></div>
+    <div class="stat"><div class="stat-val ${lowC?'warn':''}">${lowC}</div><div class="stat-lbl">Low Stock</div></div>`;
+}
+
+function openAddStock(){
+  editingId=null;
+  document.getElementById('stockModalTitle').textContent='Add Item';
+  ['sName','sEmoji','sStock','sPrice'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sCat').value='fruit';
+  document.getElementById('stockOverlay').classList.add('open');
+}
+
+function editStock(id){
+  const p=getProds().find(x=>x.id==id);
+  editingId=id;
+  document.getElementById('stockModalTitle').textContent='Edit Item';
+  document.getElementById('sName').value=p.name;
+  document.getElementById('sCat').value=p.category;
+  document.getElementById('sEmoji').value=p.emoji;
+  document.getElementById('sStock').value=p.stock;
+  document.getElementById('sPrice').value=p.price;
+  document.getElementById('stockOverlay').classList.add('open');
+}
+
+function saveStock(){
+  const name=document.getElementById('sName').value.trim();
+  if(!name){toast('⚠️ Enter item name');return;}
+  const cat=document.getElementById('sCat').value;
+  const emoji=document.getElementById('sEmoji').value.trim()||'🛒';
+  const stock=parseInt(document.getElementById('sStock').value)||0;
+  const price=parseInt(document.getElementById('sPrice').value)||0;
+  const prods=getProds();
+  if(editingId){
+    const p=prods.find(x=>x.id==editingId);
+    Object.assign(p,{name,category:cat,emoji,stock,price});
+    toast('✅ Item updated');
+  } else {
+    prods.push({id:Date.now(),name,emoji,category:cat,price,stock});
+    toast('✅ Item added');
+  }
+  save('fm_products',prods);closeOverlay('stockOverlay');renderStock();
+}
+
+function delProduct(id){
+  if(!confirm('Delete this product?'))return;
+  save('fm_products',getProds().filter(x=>x.id!=id));
+  renderStock();toast('🗑 Removed');
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+function renderPaymentsDisplay(){
+  const p=getPay();
+  document.getElementById('dUpiId').textContent=p.upiId||'—';
+  document.getElementById('dPhone').textContent=p.phone||'—';
+  document.getElementById('dName').textContent=p.name||'—';
+  document.getElementById('dBank').textContent=p.bank||'—';
+
+  const orders=getOrders();
+  const paid=orders.filter(o=>o.paymentStatus==='paid').reduce((a,o)=>a+o.total,0);
+  const unpaid=orders.filter(o=>o.paymentStatus==='pending').reduce((a,o)=>a+o.total,0);
+  const cashDue=orders.filter(o=>o.paymentStatus==='pending'&&o.paymentMethod==='cash').reduce((a,o)=>a+o.total,0);
+  const upiDue=orders.filter(o=>o.paymentStatus==='pending'&&o.paymentMethod==='upi').reduce((a,o)=>a+o.total,0);
+
+  document.getElementById('payStats').innerHTML=`
+    <div class="stat"><div class="stat-val">₹${paid}</div><div class="stat-lbl">Received</div></div>
+    <div class="stat"><div class="stat-val warn">₹${unpaid}</div><div class="stat-lbl">Pending</div></div>
+    <div class="stat"><div class="stat-val">₹${cashDue}</div><div class="stat-lbl">Cash Due</div></div>
+    <div class="stat"><div class="stat-val">₹${upiDue}</div><div class="stat-lbl">UPI Due</div></div>`;
+
+  const pendingOrders=orders.filter(o=>o.paymentStatus==='pending');
+  const pel=document.getElementById('pendingPay');
+  if(!pendingOrders.length){pel.innerHTML='<div class="empty">No pending payments 🎉</div>';return;}
+  pel.innerHTML=pendingOrders.map(o=>`
+    <div class="pending-item">
+      <div>
+        <div style="font-weight:800">${o.customer}</div>
+        <div style="font-size:.82rem;color:var(--muted)">${o.phone} · ${o.paymentMethod.toUpperCase()}</div>
+        ${o.utr?`<div style="font-size:.78rem;color:#555">UTR: ${o.utr}</div>`:''}
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:800;color:var(--green);font-size:1.1rem">₹${o.total}</div>
+        <button class="btn-sm btn-warn" onclick="markPaid('${o.id}')">💰 Mark Paid</button>
+      </div>
+    </div>`).join('');
+}
+
+function openEditPay(){
+  const p=getPay();
+  document.getElementById('eUpiId').value=p.upiId||'';
+  document.getElementById('ePhone').value=p.phone||'';
+  document.getElementById('eName').value=p.name||'';
+  document.getElementById('eBank').value=p.bank||'';
+  document.getElementById('payOverlay').classList.add('open');
+}
+
+function savePay(){
+  save('fm_payment',{
+    upiId:document.getElementById('eUpiId').value.trim(),
+    phone:document.getElementById('ePhone').value.trim(),
+    name:document.getElementById('eName').value.trim(),
+    bank:document.getElementById('eBank').value.trim()
+  });
+  closeOverlay('payOverlay');renderPaymentsDisplay();toast('✅ Payment details saved');
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function loadSettings(){
+  document.getElementById('shopNameInput').value=localStorage.getItem('fm_shop_name')||'FreshMart';
+}
+
+function changePwd(){
+  const old=document.getElementById('oldPwd').value;
+  const nw=document.getElementById('newPwd').value;
+  const cf=document.getElementById('confPwd').value;
+  if(old!==getPwd()){toast('❌ Current password wrong');return;}
+  if(nw.length<4){toast('❌ Min 4 characters');return;}
+  if(nw!==cf){toast('❌ Passwords do not match');return;}
+  localStorage.setItem('fm_admin_pwd',nw);
+  ['oldPwd','newPwd','confPwd'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Password changed!');
+}
+
+function saveShopName(){
+  const n=document.getElementById('shopNameInput').value.trim();
+  if(!n){toast('⚠️ Enter shop name');return;}
+  localStorage.setItem('fm_shop_name',n);
+  toast('✅ Shop name saved');
+}
+
+function clearAllOrders(){
+  if(!confirm('Delete ALL orders? This cannot be undone!'))return;
+  save('fm_orders',[]);renderOrders();toast('🗑 All orders cleared');
+}
+
+function resetStock(){
+  if(!confirm('Reset all products to default? This cannot be undone!'))return;
+  save('fm_products',DEFAULT_PRODUCTS);renderStock();toast('✅ Stock reset');
+}
+</script>
+</body>
+</html>
