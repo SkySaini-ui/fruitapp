@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FreshMart - Fresh Fruits & Vegetables</title>
+  <meta name="description" content="Order fresh fruits and vegetables for next-day delivery" />
+  <meta name="theme-color" content="#2d6a4f" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <div class="nav-brand">🥦 FreshMart</div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showPage('shop')">Shop</button>
+    <button class="nav-btn" onclick="showPage('orders')">Orders</button>
+    <button class="nav-btn" onclick="showPage('stock')">Stock</button>
+    <button class="nav-btn" onclick="showPage('payments')">Payments</button>
+  </div>
+  <div class="cart-icon" onclick="showCart()">
+    🛒 <span class="cart-count" id="cartCount">0</span>
+  </div>
+</nav>
+
+<!-- ===================== SHOP PAGE ===================== -->
+<div id="page-shop" class="page active">
+  <div class="hero">
+    <div class="hero-text">
+      <h1>Farm Fresh<br><span class="accent">Every Morning</span></h1>
+      <p>Order today. Delivered fresh tomorrow.</p>
+    </div>
+    <div class="hero-illustration">🍎🥦🍋🥕🍇🧅</div>
+  </div>
+
+  <div class="section-title">Today's Fresh Stock</div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterProducts('all', this)">All</button>
+    <button class="filter-btn" onclick="filterProducts('fruit', this)">🍎 Fruits</button>
+    <button class="filter-btn" onclick="filterProducts('vegetable', this)">🥦 Vegetables</button>
+  </div>
+
+  <div class="product-grid" id="productGrid"></div>
+</div>
+
+<!-- ===================== CART MODAL ===================== -->
+<div class="modal-overlay" id="cartModal" onclick="closeCart(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Your Cart 🛒</h2>
+      <button class="close-btn" onclick="closeCart()">✕</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total">Total: ₹<span id="cartTotal">0</span></div>
+      <button class="btn-primary" onclick="showCheckout()">Proceed to Order →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CHECKOUT MODAL ===================== -->
+<div class="modal-overlay" id="checkoutModal" onclick="closeCheckout(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Place Order 📋</h2>
+      <button class="close-btn" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Your Name *</label>
+      <input type="text" id="custName" placeholder="Enter your name" />
+    </div>
+    <div class="form-group">
+      <label>Phone Number *</label>
+      <input type="tel" id="custPhone" placeholder="Enter phone number" />
+    </div>
+    <div class="form-group">
+      <label>Delivery Address *</label>
+      <textarea id="custAddress" placeholder="Enter delivery address" rows="2"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Payment Method</label>
+      <div class="payment-options">
+        <label class="pay-option">
+          <input type="radio" name="payMethod" value="cash" checked /> Cash on Delivery
+        </label>
+        <label class="pay-option">
+          <input type="radio" name="payMethod" value="upi" /> UPI / Online
+        </label>
+      </div>
+    </div>
+    <div id="upiDetails" class="upi-box" style="display:none;">
+      <div class="upi-info">
+        <div class="upi-qr">📱</div>
+        <div>
+          <div class="upi-label">UPI ID</div>
+          <div class="upi-value" id="shopUpiId">yourshop@upi</div>
+          <div class="upi-label" style="margin-top:6px">Phone Pay / GPay / Paytm</div>
+          <div class="upi-value" id="shopPhone">+91 XXXXXXXXXX</div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:12px">
+        <label>Transaction / UTR Number</label>
+        <input type="text" id="utrNumber" placeholder="Enter UTR after payment" />
+      </div>
+    </div>
+    <div class="order-summary-box" id="orderSummaryBox"></div>
+    <button class="btn-primary" style="width:100%;margin-top:16px" onclick="placeOrder()">✅ Confirm Order</button>
+  </div>
+</div>
+
+<!-- ===================== ORDERS PAGE ===================== -->
+<div id="page-orders" class="page">
+  <div class="page-header">
+    <h2>Orders Dashboard</h2>
+    <div class="header-actions">
+      <select id="orderDateFilter" onchange="renderOrders()">
+        <option value="today">Today's Orders</option>
+        <option value="tomorrow">Tomorrow's Delivery</option>
+        <option value="all">All Orders</option>
+      </select>
+      <button class="btn-secondary" onclick="exportOrders()">📤 Export</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="orderStats"></div>
+  <div id="ordersList"></div>
+</div>
+
+<!-- ===================== STOCK PAGE ===================== -->
+<div id="page-stock" class="page">
+  <div class="page-header">
+    <h2>Stock Management</h2>
+    <button class="btn-primary" onclick="showAddStock()">+ Add Item</button>
+  </div>
+
+  <div class="stats-row" id="stockStats"></div>
+
+  <div class="stock-table-wrap">
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Category</th>
+          <th>Opening Stock</th>
+          <th>Sold</th>
+          <th>Available</th>
+          <th>Price (₹/kg)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="stockTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Add Stock Modal -->
+  <div class="modal-overlay" id="addStockModal" onclick="closeAddStock(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Add / Update Item</h2>
+        <button class="close-btn" onclick="closeAddStock()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>Item Name</label>
+        <input type="text" id="stockName" placeholder="e.g. Mango" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="stockCategory">
+          <option value="fruit">Fruit</option>
+          <option value="vegetable">Vegetable</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Emoji Icon</label>
+        <input type="text" id="stockEmoji" placeholder="🍎" maxlength="2" />
+      </div>
+      <div class="form-group">
+        <label>Opening Stock (kg)</label>
+        <input type="number" id="stockQty" placeholder="0" min="0" />
+      </div>
+      <div class="form-group">
+        <label>Price per kg (₹)</label>
+        <input type="number" id="stockPrice" placeholder="0" min="0" />
+      </div>
+      <button class="btn-primary" style="width:100%" onclick="saveStock()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PAYMENTS PAGE ===================== -->
+<div id="page-payments" class="page">
+  <div class="page-header">
+    <h2>Payment Details</h2>
+    <button class="btn-secondary" onclick="showEditPayment()">✏️ Edit</button>
+  </div>
+
+  <div class="payment-card">
+    <div class="payment-card-header">Your Shop's UPI Details</div>
+    <div class="payment-detail-row">
+      <span>UPI ID</span>
+      <strong id="displayUpiId">—</strong>
+    </div>
+    <div class="payment-detail-row">
+      <span>Phone (GPay/Paytm)</span>
+      <strong id="displayPhone">—</strong>
+    </div>
+    <div class="payment-detail-row">
+      <span>Account Holder</span>
+      <strong id="displayName">—</strong>
+    </div>
+    <div class="payment-detail-row">
+      <span>Bank Name</span>
+      <strong id="displayBank">—</strong>
+    </div>
+    <div class="qr-placeholder" id="qrPlaceholder">
+      <div style="font-size:48px">📱</div>
+      <div>Your QR code shown to customers</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:32px">Payment Summary</div>
+  <div class="stats-row" id="paymentStats"></div>
+
+  <div class="section-title" style="margin-top:32px">Pending Payments</div>
+  <div id="pendingPayments"></div>
+
+  <!-- Edit Payment Modal -->
+  <div class="modal-overlay" id="editPaymentModal" onclick="closeEditPayment(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Edit Payment Details</h2>
+        <button class="close-btn" onclick="closeEditPayment()">✕</button>
+      </div>
+      <div class="form-group">
+        <label>UPI ID</label>
+        <input type="text" id="editUpiId" placeholder="yourname@upi" />
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="editPhone" placeholder="+91 XXXXXXXXXX" />
+      </div>
+      <div class="form-group">
+        <label>Account Holder Name</label>
+        <input type="text" id="editHolderName" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Bank Name</label>
+        <input type="text" id="editBank" placeholder="SBI / HDFC / etc." />
+      </div>
+      <button class="btn-primary" style="width:100%" onclick="savePaymentDetails()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
